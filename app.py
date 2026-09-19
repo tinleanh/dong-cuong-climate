@@ -257,7 +257,7 @@ try:
         return fig
 
     # =====================================================================
-    # 4. MAIN DASHBOARD CONTENT & KPI METRICS
+    # 4. MAIN DASHBOARD CONTENT & KPI METRICS (2021–2100)
     # =====================================================================
     st.title("🌏 Climate Projections Dashboard")
     st.caption("Dong Cuong Commune, Lao Cai Province — CMIP6 Downscaled Projections (1990-2100)")
@@ -265,22 +265,23 @@ try:
     baseline_temp = df_hist['Temperature'].mean()
     baseline_precip = df_hist['Precipitation'].mean()
 
-    df_end_century = df_future[
-        (df_future['Year'] >= 2080) & 
+    # Tính toán trung bình toàn chu kỳ tương lai 2021-2100
+    df_future_period = df_future[
+        (df_future['Year'] >= 2021) & 
         (df_future['Model'].isin(selected_models))
     ]
 
     scenario_short = {'ssp126': 'SSP1-2.6', 'ssp245': 'SSP2-4.5', 'ssp370': 'SSP3-7.0', 'ssp585': 'SSP5-8.5'}
 
-    # ROW 1: TEMPERATURE METRICS
-    st.markdown("##### 🌡️ Projected Mean Surface Temperature (2080–2100)")
+    # ROW 1: TEMPERATURE METRICS (2021–2100)
+    st.markdown("##### 🌡️ Projected Mean Surface Temperature (2021–2100)")
     col_t_base, col_t1, col_t2, col_t3, col_t4 = st.columns(5)
     
     col_t_base.metric(label="Baseline", value=f"{baseline_temp:.2f} °C", delta="1990-2021", delta_color="off")
 
     for col, sc in zip([col_t1, col_t2, col_t3, col_t4], ['ssp126', 'ssp245', 'ssp370', 'ssp585']):
-        if sc in selected_scenarios and not df_end_century.empty:
-            sub = df_end_century[df_end_century['Scenario'] == sc]
+        if sc in selected_scenarios and not df_future_period.empty:
+            sub = df_future_period[df_future_period['Scenario'] == sc]
             if not sub.empty:
                 val = sub['Temperature'].mean()
                 col.metric(label=f"{scenario_short[sc]}", value=f"{val:.2f} °C", delta=f"{val - baseline_temp:+.2f} °C", delta_color="inverse")
@@ -289,15 +290,15 @@ try:
         else:
             col.metric(label=f"{scenario_short[sc]}", value="Off", delta="Filtered", delta_color="off")
 
-    # ROW 2: PRECIPITATION METRICS
-    st.markdown("##### 🌧️ Projected Total Annual Precipitation (2080–2100)")
+    # ROW 2: PRECIPITATION METRICS (2021–2100)
+    st.markdown("##### 🌧️ Projected Total Annual Precipitation (2021–2100)")
     col_p_base, col_p1, col_p2, col_p3, col_p4 = st.columns(5)
 
     col_p_base.metric(label="Baseline", value=f"{baseline_precip:.0f} mm", delta="1990-2021", delta_color="off")
 
     for col, sc in zip([col_p1, col_p2, col_p3, col_p4], ['ssp126', 'ssp245', 'ssp370', 'ssp585']):
-        if sc in selected_scenarios and not df_end_century.empty:
-            sub = df_end_century[df_end_century['Scenario'] == sc]
+        if sc in selected_scenarios and not df_future_period.empty:
+            sub = df_future_period[df_future_period['Scenario'] == sc]
             if not sub.empty:
                 val = sub['Precipitation'].mean()
                 pct_diff = ((val - baseline_precip) / baseline_precip) * 100
