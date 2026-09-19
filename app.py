@@ -50,77 +50,24 @@ st.markdown("""
         margin-bottom: 0.4rem !important;
     }
 
-    /* ============================================================
-       RESPONSIVE FIX (Tablet & Phone, < 768px)
-       Thay vì ép CỨNG mọi st.columns thành 50% (làm vỡ layout khi
-       số cột lẻ hoặc nhiều cột), ta dùng flex-wrap để các cột tự
-       "rớt dòng" một cách tự nhiên, và chỉ thu nhỏ min-width.
-       ============================================================ */
+    /* Tối ưu hiển thị Lưới 2 cột cho Điện thoại và Tablet (< 768px) */
     @media (max-width: 768px) {
         .block-container {
-            padding-left: 0.7rem !important;
-            padding-right: 0.7rem !important;
+            padding-left: 0.8rem !important;
+            padding-right: 0.8rem !important;
             padding-top: 0.6rem !important;
         }
+        /* Ép các cột st.columns hiển thị thành 2 cột cạnh nhau thay vì xếp dọc */
+        [data-testid="column"] {
+            width: 50% !important;
+            flex: 0 0 50% !important;
+            min-width: 50% !important;
+        }
         h1 {
-            font-size: 1.05rem !important;
-            line-height: 1.3rem !important;
-        }
-        .stCaption, [data-testid="stCaptionContainer"] {
-            font-size: 0.72rem !important;
-        }
-        h5 {
-            font-size: 0.8rem !important;
-        }
-
-        /* Cho phép các cột (columns) tự xuống dòng thay vì bị nén
-           hoặc bị ép cứng 50% một cách vô điều kiện */
-        [data-testid="stHorizontalBlock"] {
-            flex-wrap: wrap !important;
-            row-gap: 0.6rem !important;
-        }
-        [data-testid="column"] {
-            min-width: 46% !important;
-            flex: 1 1 46% !important;
-        }
-
-        [data-testid="stMetric"] {
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 0.45rem 0.5rem !important;
+            font-size: 1.1rem !important;
         }
         [data-testid="stMetricValue"] {
-            font-size: 0.95rem !important;
-        }
-        [data-testid="stMetricLabel"] {
-            font-size: 0.68rem !important;
-        }
-        [data-testid="stMetricDelta"] {
-            font-size: 0.65rem !important;
-        }
-
-        /* Tab labels nhỏ lại và không bị tràn dòng */
-        button[data-baseweb="tab"] {
-            font-size: 0.78rem !important;
-            padding: 0.4rem 0.5rem !important;
-        }
-
-        /* Tăng vùng chạm cho checkbox / multiselect để dễ thao tác tay */
-        [data-testid="stCheckbox"] label,
-        .stMultiSelect, .stSlider {
-            font-size: 0.85rem !important;
-        }
-    }
-
-    /* Điện thoại rất nhỏ (< 480px): 2 cột con số vẫn giữ, nhưng chữ
-       nhỏ thêm một nấc để không bị tràn */
-    @media (max-width: 480px) {
-        [data-testid="column"] {
-            min-width: 100% !important;
-            flex: 1 1 100% !important;
-        }
-        [data-testid="stMetricValue"] {
-            font-size: 1.0rem !important;
+            font-size: 0.9rem !important;
         }
     }
 </style>
@@ -182,7 +129,7 @@ try:
 
     st.sidebar.subheader("🛰️ CMIP6 Climate Models")
     available_models = sorted(df_future['Model'].unique().tolist())
-
+    
     col_m1, col_m2 = st.sidebar.columns(2)
     select_all = col_m1.button("Select All", use_container_width=True)
     clear_all = col_m2.button("Clear All", use_container_width=True)
@@ -228,8 +175,8 @@ try:
             ))
 
         df_f_filtered = df_future[
-            (df_future['Year'] >= year_range[0]) &
-            (df_future['Year'] <= year_range[1]) &
+            (df_future['Year'] >= year_range[0]) & 
+            (df_future['Year'] <= year_range[1]) & 
             (df_future['Scenario'].isin(selected_scenarios)) &
             (df_future['Model'].isin(selected_models))
         ]
@@ -295,20 +242,17 @@ try:
 
         fig.update_layout(
             title=dict(
-                # font nhỏ hơn + automargin để không bị cắt/tràn trên màn hình hẹp
                 text=f"<b>{main_title}</b><br><span style='font-size: 10px; color: #666666;'>{subtitle_text}</span>",
-                x=0.01, y=0.97, xanchor='left', yanchor='top',
-                font=dict(size=14),
-                automargin=True
+                x=0.01, y=0.96, xanchor='left', yanchor='top'
             ),
             xaxis=dict(title=None, showgrid=True, gridcolor='#ececec', range=[year_range[0], year_range[1]]),
-            yaxis=dict(title=y_axis_label, showgrid=True, gridcolor='#ececec', automargin=True),
+            yaxis=dict(title=y_axis_label, showgrid=True, gridcolor='#ececec'),
             template="plotly_white",
-            hovermode="closest",  # Tối ưu thao tác chạm (touch) trên điện thoại
-            legend=dict(orientation="h", yanchor="bottom", y=-0.30, xanchor="center", x=0.5, font=dict(size=9)),
-            margin=dict(t=60, b=55, l=45, r=15),
+            hovermode="closest",
+            legend=dict(orientation="h", yanchor="bottom", y=-0.28, xanchor="center", x=0.5, font=dict(size=9)),
+            margin=dict(t=50, b=45, l=45, r=20),
             autosize=True,
-            height=360
+            height=380
         )
         return fig
 
@@ -322,26 +266,19 @@ try:
     baseline_precip = df_hist['Precipitation'].mean()
 
     df_end_century = df_future[
-        (df_future['Year'] >= 2080) &
+        (df_future['Year'] >= 2080) & 
         (df_future['Model'].isin(selected_models))
     ]
 
     scenario_short = {'ssp126': 'SSP1-2.6', 'ssp245': 'SSP2-4.5', 'ssp370': 'SSP3-7.0', 'ssp585': 'SSP5-8.5'}
 
-    # ---------------------------------------------------------------
     # ROW 1: TEMPERATURE METRICS
-    # Baseline được tách riêng thành 1 hàng full-width, 4 kịch bản
-    # còn lại xếp thành lưới 2x2 rõ ràng — tự nhiên "rớt dòng" tốt
-    # trên mọi kích thước màn hình mà không cần ép cứng tỉ lệ %.
-    # ---------------------------------------------------------------
     st.markdown("##### 🌡️ Projected Mean Surface Temperature (2080–2100)")
-    st.metric(label="Baseline (1990–2021 Mean)", value=f"{baseline_temp:.2f} °C")
+    col_t_base, col_t1, col_t2, col_t3, col_t4 = st.columns(5)
+    
+    col_t_base.metric(label="Baseline", value=f"{baseline_temp:.2f} °C", delta="1990-2021", delta_color="off")
 
-    temp_row1 = st.columns(2)
-    temp_row2 = st.columns(2)
-    temp_cols = temp_row1 + temp_row2
-
-    for col, sc in zip(temp_cols, ['ssp126', 'ssp245', 'ssp370', 'ssp585']):
+    for col, sc in zip([col_t1, col_t2, col_t3, col_t4], ['ssp126', 'ssp245', 'ssp370', 'ssp585']):
         if sc in selected_scenarios and not df_end_century.empty:
             sub = df_end_century[df_end_century['Scenario'] == sc]
             if not sub.empty:
@@ -352,17 +289,13 @@ try:
         else:
             col.metric(label=f"{scenario_short[sc]}", value="Off", delta="Filtered", delta_color="off")
 
-    # ---------------------------------------------------------------
-    # ROW 2: PRECIPITATION METRICS (cùng cấu trúc 2x2)
-    # ---------------------------------------------------------------
+    # ROW 2: PRECIPITATION METRICS
     st.markdown("##### 🌧️ Projected Total Annual Precipitation (2080–2100)")
-    st.metric(label="Baseline (1990–2021 Mean)", value=f"{baseline_precip:.0f} mm")
+    col_p_base, col_p1, col_p2, col_p3, col_p4 = st.columns(5)
 
-    precip_row1 = st.columns(2)
-    precip_row2 = st.columns(2)
-    precip_cols = precip_row1 + precip_row2
+    col_p_base.metric(label="Baseline", value=f"{baseline_precip:.0f} mm", delta="1990-2021", delta_color="off")
 
-    for col, sc in zip(precip_cols, ['ssp126', 'ssp245', 'ssp370', 'ssp585']):
+    for col, sc in zip([col_p1, col_p2, col_p3, col_p4], ['ssp126', 'ssp245', 'ssp370', 'ssp585']):
         if sc in selected_scenarios and not df_end_century.empty:
             sub = df_end_century[df_end_century['Scenario'] == sc]
             if not sub.empty:
@@ -386,14 +319,13 @@ try:
     temp_colors = {'ssp126': '#e6b800', 'ssp245': '#e67e22', 'ssp370': '#e74c3c', 'ssp585': '#800020'}
     precip_colors = {'ssp126': '#48cae4', 'ssp245': '#0096c7', 'ssp370': '#0077b6', 'ssp585': '#03045e'}
 
-    # Cấu hình touch-friendly cho Plotly trên mobile
     config = {'responsive': True, 'displayModeBar': False, 'scrollZoom': False}
 
     with tab_temp:
         fig_t = build_chart(
             variable_col='Temperature',
             y_axis_label='Annual Mean Temp (°C)',
-            main_title='Projected Mean Surface Temperature',
+            main_title='Time Series of Projected Mean Surface Temperature',
             color_palette=temp_colors,
             unit='°C'
         )
@@ -403,7 +335,7 @@ try:
         fig_p = build_chart(
             variable_col='Precipitation',
             y_axis_label='Annual Precip (mm)',
-            main_title='Projected Annual Total Precipitation',
+            main_title='Time Series of Projected Annual Total Precipitation',
             color_palette=precip_colors,
             unit='mm'
         )
@@ -412,8 +344,8 @@ try:
     with tab_table:
         f_hist_show = df_hist[(df_hist['Year'] >= year_range[0]) & (df_hist['Year'] <= year_range[1])]
         f_fut_show = df_future[
-            (df_future['Year'] >= year_range[0]) &
-            (df_future['Year'] <= year_range[1]) &
+            (df_future['Year'] >= year_range[0]) & 
+            (df_future['Year'] <= year_range[1]) & 
             (df_future['Scenario'].isin(selected_scenarios)) &
             (df_future['Model'].isin(selected_models))
         ]
