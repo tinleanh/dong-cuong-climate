@@ -57,7 +57,6 @@ st.markdown("""
             padding-right: 0.8rem !important;
             padding-top: 0.6rem !important;
         }
-        /* Ép các cột st.columns hiển thị thành 2 cột cạnh nhau thay vì xếp dọc */
         [data-testid="column"] {
             width: 50% !important;
             flex: 0 0 50% !important;
@@ -158,7 +157,7 @@ try:
         st.warning("⚠️ Please select at least one Climate Model.")
 
     # =====================================================================
-    # 3. RESPONSIVE INTERACTIVE PLOT BUILDER
+    # 3. RESPONSIVE INTERACTIVE PLOT BUILDER (CUSTOM HOVER)
     # =====================================================================
     def build_chart(variable_col, y_axis_label, main_title, color_palette, unit):
         fig = go.Figure()
@@ -171,7 +170,7 @@ try:
                 mode='lines',
                 name=f"Observed ({min_year}-{hist_end_year})",
                 line=dict(color='#111111', width=2.0),
-                hovertemplate=f"Year: %{{x}}<br>Observed: %{{y:.2f}} {unit}<extra></extra>"
+                hovertemplate=f"Observed; %{{x}}: %{{y:.2f}} {unit}<extra></extra>"
             ))
 
         df_f_filtered = df_future[
@@ -189,6 +188,7 @@ try:
 
                 hex_color = color_palette[sc]
                 rgb_color = f"rgba({int(hex_color[1:3], 16)}, {int(hex_color[3:5], 16)}, {int(hex_color[5:7], 16)}, 0.16)"
+                mean_label = f"{scenario_labels[sc].split(' ')[0]}"
 
                 if show_individual_models:
                     for m in selected_models:
@@ -198,11 +198,11 @@ try:
                                 x=m_data['Year'],
                                 y=m_data[variable_col],
                                 mode='lines',
-                                name=f"{scenario_labels[sc].split(' ')[0]} - {m}",
+                                name=f"{mean_label} - {m}",
                                 line=dict(color=hex_color, width=0.7, dash='dot'),
                                 opacity=0.4,
                                 showlegend=False,
-                                hovertemplate=f"Model: {m}<br>Year: %{{x}}<br>Value: %{{y:.2f}} {unit}<extra></extra>"
+                                hovertemplate=f"{mean_label} ({m}); %{{x}}: %{{y:.2f}} {unit}<extra></extra>"
                             ))
 
                 summary = sc_data.groupby('Year')[variable_col].agg(Mean='mean', Min='min', Max='max').reset_index()
@@ -220,14 +220,14 @@ try:
                         showlegend=False, hoverinfo='skip'
                     ))
 
-                mean_label = f"{scenario_labels[sc].split(' ')[0]}"
+                # Hover label theo định dạng: SSP5-8.5; 2080: 26.72 °C
                 fig.add_trace(go.Scatter(
                     x=summary['Year'],
                     y=summary['Mean'],
                     mode='lines',
                     name=mean_label,
                     line=dict(color=hex_color, width=2.0),
-                    hovertemplate=f"{mean_label}: %{{y:.2f}} {unit}<extra></extra>"
+                    hovertemplate=f"{mean_label}; %{{x}}: %{{y:.2f}} {unit}<extra></extra>"
                 ))
 
         if year_range[0] <= hist_end_year <= year_range[1]:
@@ -265,7 +265,6 @@ try:
     baseline_temp = df_hist['Temperature'].mean()
     baseline_precip = df_hist['Precipitation'].mean()
 
-    # Tính toán trung bình toàn chu kỳ tương lai 2021-2100
     df_future_period = df_future[
         (df_future['Year'] >= 2021) & 
         (df_future['Model'].isin(selected_models))
